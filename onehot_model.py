@@ -5,9 +5,9 @@ from keras.optimizers import Adam
 from callbacks.text_generation_callbacks import end_epoch_generate, early_stopping, reduce_lr
 from src.utils import get_tensor, sample
 
-# assume sentences, next_char, char_indices, indices_char, maximum_seq_length, chars are already defined
 
-# 1) Build model
+
+#  model initialization
 model = Sequential()
 model.add(LSTM(128,
                input_shape=(maximum_seq_length, len(chars)),
@@ -20,14 +20,14 @@ model.add(Activation('softmax'))
 model.compile(loss='categorical_crossentropy',
               optimizer=Adam(learning_rate=0.001))
 
-# 2) Train
+#training
 model.fit(X, y,
           batch_size=128,
           epochs=20,
           validation_split=0.2,
           callbacks=[end_epoch_generate, early_stopping, reduce_lr])
 
-# 3) Generation functions
+#  Generation 
 def generate_next(model, text, num_generated=120, temperature=1.0):
     generated = text
     sentence = text[-maximum_seq_length:]
@@ -40,7 +40,7 @@ def generate_next(model, text, num_generated=120, temperature=1.0):
         sentence = sentence[1:] + next_char
     return generated
 
-def generate_beam(model, text, beam_size=5, num_generated=120):
+def generate_beam(model, text, beam_size=5, num_generated=120): # Beam Algorithm
     sentence = text[-maximum_seq_length:]
     current_beam = [(0.0, [], sentence)]
     for _ in range(num_generated):
