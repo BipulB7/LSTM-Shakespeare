@@ -5,9 +5,9 @@ from keras.optimizers import Adam
 from callbacks.text_generation_callbacks import end_epoch_generate, early_stopping, reduce_lr
 from src.utils import get_tensor_emb, sample
 
-# assume sentences, next_char, char_indices, indices_char, maximum_seq_length, chars are defined
 
-# prepare X_emb, y_emb as per Q10
+
+#  X_emb, y_emb as per Q10
 X_emb = np.zeros((len(sentences), maximum_seq_length), dtype=int)
 y_emb = np.zeros(len(sentences), dtype=int)
 for i, sent in enumerate(sentences):
@@ -15,7 +15,7 @@ for i, sent in enumerate(sentences):
         X_emb[i, t] = char_indices[ch]
     y_emb[i] = char_indices[next_char[i]]
 
-# 1) Build model
+# Model building
 model_emb_m2m = Sequential()
 model_emb_m2m.add(Embedding(input_dim=len(chars), output_dim=32, input_length=maximum_seq_length))
 model_emb_m2m.add(LSTM(128))
@@ -23,14 +23,14 @@ model_emb_m2m.add(Dense(len(chars), activation='softmax'))
 model_emb_m2m.compile(loss='sparse_categorical_crossentropy',
                       optimizer=Adam(learning_rate=0.001))
 
-# 2) Train
+#Traininig
 model_emb_m2m.fit(X_emb, y_emb,
                   batch_size=64,
                   epochs=5,
                   validation_split=0.2,
                   callbacks=[end_epoch_generate, early_stopping, reduce_lr])
 
-# 3) Generation
+# gen
 def generate_next_emb(model, text, num_generated=120, temperature=1.0):
     generated = text
     sentence = text[-maximum_seq_length:]
